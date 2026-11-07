@@ -165,19 +165,6 @@ define([], function () {
         body.appendChild(this.switchRow('AllowExtractFallback', '无 bif 时允许抽帧', '默认关闭。条目完全没有 bif 时直接跳过；打开后会尝试用 ffmpeg 抽帧（较耗 CPU，strm 链接无效）。'));
         body.appendChild(this.switchRow('DebugLogging', '调试日志', '把每个条目的处理结果写入 Emby 日志。'));
 
-        var f = el('div', 'cif-field');
-        f.appendChild(el('label', 'cif-label', '定时任务间隔（天）'));
-        var input = document.createElement('input');
-        input.type = 'text';
-        input.value = String(this.state.IntervalDays || 7);
-        input.addEventListener('input', function () {
-            var n = parseInt(input.value, 10);
-            self.state.IntervalDays = isNaN(n) ? 7 : n;
-        });
-        f.appendChild(input);
-        f.appendChild(el('div', 'cif-hint', '计划任务按此间隔自动运行。手动运行不受限制。'));
-        body.appendChild(f);
-
         var f2 = el('div', 'cif-field');
         f2.appendChild(el('label', 'cif-label', '每次最多处理（个）'));
         var input2 = document.createElement('input');
@@ -249,7 +236,6 @@ define([], function () {
             VideosOnly: !!self.state.VideosOnly,
             DebugLogging: !!self.state.DebugLogging,
             ForceRegenerate: !!self.state.ForceRegenerate,
-            IntervalDays: self.state.IntervalDays || 7,
             MaxItemsPerRun: self.state.MaxItemsPerRun || 0,
             AllowExtractFallback: !!self.state.AllowExtractFallback
         };

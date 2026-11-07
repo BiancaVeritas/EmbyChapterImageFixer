@@ -30,18 +30,13 @@ namespace EmbyChapterImageFixer
         public string Category => "Library";
 
         /// <summary>
-        /// 按配置的间隔天数自动运行。
+        /// 不预设自动触发器。
+        /// 运行周期由用户在「仪表板 → 计划任务」里按需配置，
+        /// 不再由插件设置页提供间隔选项。
         /// </summary>
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
         {
-            var cfg = Plugin.Instance?.Options;
-            var days = cfg != null && cfg.IntervalDays > 0 ? cfg.IntervalDays : 7;
-
-            yield return new TaskTriggerInfo
-            {
-                Type = TaskTriggerInfo.TriggerInterval,
-                IntervalTicks = TimeSpan.FromDays(days).Ticks
-            };
+            yield break;
         }
 
         public async Task Execute(CancellationToken cancellationToken, IProgress<double> progress)

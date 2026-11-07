@@ -22,9 +22,6 @@ namespace EmbyChapterImageFixer
         /// </summary>
         public bool ForceRegenerate { get; set; }
 
-        /// <summary>计划任务间隔（天）。</summary>
-        public int IntervalDays { get; set; } = 7;
-
         /// <summary>每次最多处理多少个条目，0 表示不限制。防止一次跑太久。</summary>
         public int MaxItemsPerRun { get; set; }
 
@@ -51,7 +48,6 @@ namespace EmbyChapterImageFixer
         public bool VideosOnly { get; set; }
         public bool DebugLogging { get; set; }
         public bool ForceRegenerate { get; set; }
-        public int IntervalDays { get; set; }
         public int MaxItemsPerRun { get; set; }
         public bool AllowExtractFallback { get; set; }
     }
@@ -67,7 +63,6 @@ namespace EmbyChapterImageFixer
                 VideosOnly = cfg.VideosOnly,
                 DebugLogging = cfg.DebugLogging,
                 ForceRegenerate = cfg.ForceRegenerate,
-                IntervalDays = cfg.IntervalDays,
                 MaxItemsPerRun = cfg.MaxItemsPerRun,
                 AllowExtractFallback = cfg.AllowExtractFallback
             };
@@ -81,7 +76,6 @@ namespace EmbyChapterImageFixer
         public bool VideosOnly { get; set; }
         public bool DebugLogging { get; set; }
         public bool ForceRegenerate { get; set; }
-        public int IntervalDays { get; set; }
         public int MaxItemsPerRun { get; set; }
         public bool AllowExtractFallback { get; set; }
     }
@@ -110,7 +104,6 @@ namespace EmbyChapterImageFixer
                     VideosOnly = request.VideosOnly,
                     DebugLogging = request.DebugLogging,
                     ForceRegenerate = request.ForceRegenerate,
-                    IntervalDays = request.IntervalDays > 0 ? request.IntervalDays : 7,
                     MaxItemsPerRun = request.MaxItemsPerRun > 0 ? request.MaxItemsPerRun : 0,
                     AllowExtractFallback = request.AllowExtractFallback
                 };
