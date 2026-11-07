@@ -146,7 +146,7 @@ define([], function () {
         root.innerHTML = '';
         root.className = 'cif-root';
 
-        root.appendChild(el('h1', 'cif-title', 'EmbyChapterImageFixer'));
+        root.appendChild(el('h1', 'cif-title', 'Emby章节图修复工具'));
         var sub = el('div', 'cif-sub');
         sub.innerHTML = '把已有的缩略图集（bif）引用补到缺少章节图的章节上，包括片头、片尾等标记点。<br>' +
             '不抽帧、不改动媒体库设置；视频旁边已有 bif 的条目会自动按时间点取图。';
