@@ -124,28 +124,42 @@ namespace EmbyChapterImageFixer
         {
             if (chapters == null || chapters.Count == 0) return 0;
 
-            // 找一条「有效」的引用作为模板：
-            // 有 ImagePath、且文件真实存在。优先取普通章节。
-            ChapterInfo template = null;
+            // 模板来源一：同一条目里已有的、文件真实存在的 bif 引用。
+            string bifPath = null;
+            string bifTag = null;
+            DateTimeOffset dateModified = default(DateTimeOffset);
+
             foreach (var c in chapters)
             {
                 if (string.IsNullOrEmpty(c.ImagePath)) continue;
-                if (!_fileSystem.FileExists(c.ImagePath)) continue;
-                if (template == null || c.MarkerType == MarkerType.Chapter) template = c;
-                if (template != null && template.MarkerType == MarkerType.Chapter) break;
+                if (!FileExistsSafe(c.ImagePath)) continue;
+                bifPath = c.ImagePath;
+                bifTag = c.ImageTag;
+                dateModified = c.ImageDateModified;
+                if (c.MarkerType == MarkerType.Chapter) break;
             }
 
-            if (template == null)
+            // 模板来源二：扫描视频所在目录里的 bif 文件。
+            // 对齐 Emby 自己的 GetBifsFromFolder 规则：
+            // 目录内、扩展名 .bif、文件名以视频文件名（不含扩展名）开头。
+            // 这样即使数据库里所有章节的 ImagePath 都是空的，
+            // 只要 bif 就放在视频旁边，也能补上引用。
+            if (bifPath == null)
             {
-                // 没有任何可用的 bif 模板：这个条目确实没图，
-                // 留给抽帧流程处理（或由用户自行补 bif）。
-                trace?.Invoke("未找到可用的 bif 引用模板，跳过");
+                bifPath = FindLocalBif(video);
+                if (bifPath != null)
+                {
+                    dateModified = _fileSystem.GetLastWriteTimeUtc(bifPath);
+                    trace?.Invoke($"从视频目录找到 bif：{bifPath}");
+                }
+            }
+
+            if (bifPath == null)
+            {
+                // 目录里也没有 bif：这个条目确实没图，交给用户自行补，或走抽帧兜底。
+                trace?.Invoke("视频目录里未找到 bif，跳过");
                 return 0;
             }
-
-            var bifPath = template.ImagePath;
-            var bifTag = template.ImageTag;
-            var dateModified = template.ImageDateModified;
 
             int fixedCount = 0;
             foreach (var c in chapters)
@@ -169,6 +183,52 @@ namespace EmbyChapterImageFixer
             }
 
             return fixedCount;
+        }
+
+        /// <summary>
+        /// 在视频所在目录里找 bif。规则与 Emby 的 GetBifsFromFolder 一致：
+        /// 目录内、扩展名 .bif、文件名以视频文件名（不含扩展名）开头。
+        /// 有多个时按文件名排序取第一个。
+        /// </summary>
+        private string FindLocalBif(Video video)
+        {
+            try
+            {
+                var videoPath = video.Path;
+                if (string.IsNullOrWhiteSpace(videoPath)) return null;
+
+                var folder = _fileSystem.GetDirectoryName(videoPath);
+                if (string.IsNullOrWhiteSpace(folder)) return null;
+
+                var prefix = _fileSystem.GetFileNameWithoutExtension(videoPath);
+                if (string.IsNullOrEmpty(prefix)) return null;
+
+                var files = _fileSystem.GetFiles(folder, new[] { ".bif" }, false, false);
+                if (files == null) return null;
+
+                string best = null;
+                foreach (var f in files)
+                {
+                    if (f == null || f.IsDirectory) continue;
+                    var name = _fileSystem.GetFileNameWithoutExtension(f.FullName);
+                    if (string.IsNullOrEmpty(name)) continue;
+                    if (!name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (best == null || string.CompareOrdinal(f.FullName, best) < 0) best = f.FullName;
+                }
+
+                return best;
+            }
+            catch (Exception ex)
+            {
+                _logger?.ErrorException("[ChapterImageFixer] 扫描 bif 失败：" + video.Name, ex);
+                return null;
+            }
+        }
+
+        private bool FileExistsSafe(string path)
+        {
+            try { return _fileSystem.FileExists(path); }
+            catch { return false; }
         }
 
         /// <summary>
@@ -231,6 +291,15 @@ namespace EmbyChapterImageFixer
         /// </summary>
         private async Task<bool> ExtractImagesAsync(Video video, List<ChapterInfo> chapters, bool forceRegenerate, Action<string> trace, CancellationToken ct)
         {
+            // 抽帧必须有实体视频文件。strm 只是链接，无法抽帧。
+            // 注意：这个判断只放在抽帧兜底里，不影响上面的 bif 引用复制。
+            if (string.IsNullOrWhiteSpace(video.Path) ||
+                video.Path.EndsWith(".strm", StringComparison.OrdinalIgnoreCase))
+            {
+                trace?.Invoke($"{video.Name}：无实体视频文件，跳过抽帧");
+                return false;
+            }
+
             // 取媒体源（要含章节信息）
             var sources = _mediaSourceManager.GetStaticMediaSources(
                 video, enablePathSubstitution: false, fillChapters: true, deviceProfile: null, user: null);

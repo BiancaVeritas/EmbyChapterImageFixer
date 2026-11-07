@@ -179,12 +179,10 @@ namespace EmbyChapterImageFixer
                 if (video.ExtraType != null) continue;
                 if (video.IsThemeMedia) continue;
 
-                // 没有实体文件无法抽帧
-                if (string.IsNullOrWhiteSpace(video.Path)) continue;
-
-                // .strm 是流媒体链接文件，本身不含视频数据，
-                // ffmpeg 无法从中抽帧，处理了也只会空转。
-                if (video.Path.EndsWith(".strm", StringComparison.OrdinalIgnoreCase)) continue;
+                // 刻意不按扩展名或文件路径过滤：
+                // 本插件补的是「章节记录里指向 bif 的 ImagePath」，
+                // 与视频文件本身是 mp4 / mkv / strm 无关。
+                // bif 是独立放在视频旁边的缩略图集文件。
 
                 result.Add(video);
             }

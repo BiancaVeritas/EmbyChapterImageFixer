@@ -31,7 +31,7 @@ namespace EmbyChapterImageFixer
         /// <summary>
         /// 当条目完全没有可用的 bif 时，是否允许调用 Emby 抽帧兜底。
         /// 默认关闭：本插件只做「把已有 bif 引用补到缺图章节」这一件事。
-        /// 打开后会对无 bif 的真实视频尝试抽帧（较耗 CPU，strm 链接无效）。
+        /// 打开后会对完全没有 bif 的条目尝试抽帧（较耗 CPU；strm 链接文件无实体视频，会跳过）。
         /// </summary>
         public bool AllowExtractFallback { get; set; }
     }
