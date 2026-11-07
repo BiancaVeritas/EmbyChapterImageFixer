@@ -1,0 +1,19 @@
+# 构建产物
+bin/
+obj/
+*.user
+.vs/
+
+# 本地打包输出
+dist/
+
+# 临时探针与预览文件
+Probe/
+pv*.png
+*.log
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

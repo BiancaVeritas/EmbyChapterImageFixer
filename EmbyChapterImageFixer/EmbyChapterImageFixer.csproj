@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Emby Server 4.10 运行在 .NET 8 上 -->
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>EmbyChapterImageFixer</AssemblyName>
+    <RootNamespace>EmbyChapterImageFixer</RootNamespace>
+    <Version>3.1.0.0</Version>
+    <AssemblyVersion>3.1.0.0</AssemblyVersion>
+    <FileVersion>3.1.0.0</FileVersion>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DebugType>none</DebugType>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <NoWarn>$(NoWarn);CS1591;NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Emby 官方插件 SDK，运行时由服务端提供 -->
+    <PackageReference Include="MediaBrowser.Server.Core" Version="4.10.0.24-beta2">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+    <PackageReference Include="MediaBrowser.Common" Version="4.10.0.24-beta2">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- 设置页 HTML 与脚本，嵌入 DLL 保持单文件分发 -->
+    <EmbeddedResource Include="Web\config.html" />
+    <EmbeddedResource Include="Web\config.js" />
+  </ItemGroup>
+
+</Project>
